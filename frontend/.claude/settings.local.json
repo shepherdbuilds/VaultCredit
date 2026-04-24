@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep *)",
+      "Bash(npm run *)",
+      "Bash(curl -s --max-time 10 -X POST https://rpc.ankr.com/eth_sepolia -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"method\":\"eth_call\",\"params\":[{\"to\":\"0x000000000000000000000000000000000000005d\",\"data\":\"0xd9d47bb001\"},\"latest\"],\"id\":1}')",
+      "Bash(curl -s --max-time 10 -X POST https://eth-sepolia.g.alchemy.com/v2/Nbuc6HfXmZ3mh6lCcmlbl -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"method\":\"eth_call\",\"params\":[{\"to\":\"0x000000000000000000000000000000000000005d\",\"data\":\"0xd9d47bb001\"},\"latest\"],\"id\":1}')",
+      "Bash(curl -sv --max-time 10 \"https://gateway.sepolia.zama.ai\")",
+      "Bash(nslookup gateway.sepolia.zama.ai)",
+      "Bash(nslookup coprocessor.sepolia.zama.ai)",
+      "Bash(npm info *)",
+      "Bash(npm install *)",
+      "Bash(python3 -c ' *)",
+      "Bash(nslookup relayer.testnet.zama.org)",
+      "Bash(node -e ' *)",
+      "Bash(pkill -f \"vite\")",
+      "Bash(node *)"
+    ]
+  }
+}
