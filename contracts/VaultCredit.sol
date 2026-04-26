@@ -86,6 +86,77 @@ contract VaultCredit is ZamaEthereumConfig {
     }
 
     /**
+     * @notice Testnet demo entry point — accepts plain uint values, computes the score
+     *         in plaintext using the identical formula as _computeScore(), then stores
+     *         the result as an FHE-encrypted euint32 via FHE.asEuint32().
+     *
+     * @dev Intended for bounty judges / demo use where the Zama relayer SDK ACL
+     *      pre-flight blocks client-side createEncryptedInput() on fresh wallets.
+     *      The on-chain FHE data model is identical — the score is stored encrypted
+     *      and all existing view/threshold functions work against it unchanged.
+     *
+     * @param income     Monthly income in USD (plain uint32)
+     * @param debt       Total outstanding debt in USD (plain uint32)
+     * @param missed     Missed payments in last 12 months (0–12)
+     * @param employment Months of continuous employment (plain uint32)
+     */
+    function submitCreditDataMock(
+        uint32 income,
+        uint32 debt,
+        uint32 missed,
+        uint32 employment
+    ) external {
+        require(missed <= MAX_MISSED_PAYMENTS, "VaultCredit: missed payments must be 0-12");
+
+        // ── Identical scoring formula to _computeScore(), in plaintext ────────────
+
+        uint32 score = BASE_SCORE;
+
+        // Income bonus
+        uint32 incomeBonus = income / INCOME_DIVISOR;
+        if (incomeBonus > MAX_INCOME_BONUS) incomeBonus = MAX_INCOME_BONUS;
+        score += incomeBonus;
+
+        // Debt penalty — guarded against underflow below MIN_SCORE
+        uint32 debtPenalty = debt / DEBT_DIVISOR;
+        if (debtPenalty > MAX_DEBT_PENALTY) debtPenalty = MAX_DEBT_PENALTY;
+        if (score >= debtPenalty + MIN_SCORE) {
+            score -= debtPenalty;
+        } else {
+            score = MIN_SCORE;
+        }
+
+        // Missed payment penalty — guarded against underflow below MIN_SCORE
+        uint32 cappedMissed   = missed < MAX_MISSED_PAYMENTS ? missed : MAX_MISSED_PAYMENTS;
+        uint32 paymentPenalty = cappedMissed * PAYMENT_PENALTY;
+        if (score >= paymentPenalty + MIN_SCORE) {
+            score -= paymentPenalty;
+        } else {
+            score = MIN_SCORE;
+        }
+
+        // Employment bonus
+        uint32 cappedMonths    = employment < MAX_EMPLOYMENT_MONTHS ? employment : MAX_EMPLOYMENT_MONTHS;
+        score += cappedMonths * EMPLOYMENT_MULTIPLIER;
+
+        // Final ceiling
+        if (score > MAX_SCORE) score = MAX_SCORE;
+
+        // Wrap the plaintext result in an FHE ciphertext — same storage path as the
+        // full FHE flow; checkCreditThreshold() and getEncryptedScore() work unchanged
+        euint32 encryptedScore = FHE.asEuint32(score);
+
+        profiles[msg.sender].score       = encryptedScore;
+        profiles[msg.sender].lastUpdated = block.timestamp;
+        profiles[msg.sender].exists      = true;
+
+        FHE.allowThis(encryptedScore);
+        FHE.allow(encryptedScore, msg.sender);
+
+        emit ScoreComputed(msg.sender, block.timestamp);
+    }
+
+    /**
      * @notice Lender requests whether a borrower's score meets an encrypted threshold.
      *         Neither the actual score nor the threshold is decryptable by any other party —
      *         the lender receives only an encrypted boolean result.

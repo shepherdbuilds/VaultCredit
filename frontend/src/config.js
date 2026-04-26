@@ -7,7 +7,7 @@ export const SEPOLIA_CHAIN_ID_HEX = "0xaa36a7";
 // routes calls to a wrong address (e.g. a Zama system contract).
 export const CONTRACT_ADDRESS =
   import.meta.env.VITE_CONTRACT_ADDRESS ||
-  "0x80Eb34D15D2f116493fe682F600840BA83F46A3d";
+  "0xbB1e9b826c76EC462B09654B0D193EcD4a8C4331";
 
 // ─── RPC (read-only queries: events, view calls) ──────────────────────────────
 export const SEPOLIA_RPC_URL =

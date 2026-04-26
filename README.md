@@ -8,7 +8,7 @@
 [![Zama fhEVM](https://img.shields.io/badge/Zama-fhEVM-FF6B35)](https://www.zama.ai/fhevm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Contract:** [`0xb0d7580baE00750F060F0B719925fD2C03EE434f`](https://sepolia.etherscan.io/address/0xb0d7580baE00750F060F0B719925fD2C03EE434f) · Sepolia Testnet
+**Contract:** [`0xbB1e9b826c76EC462B09654B0D193EcD4a8C4331`](https://sepolia.etherscan.io/address/0xbB1e9b826c76EC462B09654B0D193EcD4a8C4331) · Sepolia Testnet
 
 ---
 
@@ -168,7 +168,7 @@ All arithmetic — including division, min, subtraction, and multiplication — 
 
 ## Smart Contract
 
-**Address:** [`0xb0d7580baE00750F060F0B719925fD2C03EE434f`](https://sepolia.etherscan.io/address/0xb0d7580baE00750F060F0B719925fD2C03EE434f)  
+**Address:** [`0xbB1e9b826c76EC462B09654B0D193EcD4a8C4331`](https://sepolia.etherscan.io/address/0xbB1e9b826c76EC462B09654B0D193EcD4a8C4331)  
 **Network:** Ethereum Sepolia Testnet (Chain ID: 11155111)  
 **Compiler:** Solidity 0.8.24  
 **Inherits:** `ZamaEthereumConfig` — auto-configures the FHE coprocessor, KMS, and ACL contract addresses for Sepolia

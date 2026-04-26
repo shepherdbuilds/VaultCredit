@@ -1,14 +1,11 @@
 import { useState } from "react";
 import { BrowserProvider, Contract, getAddress } from "ethers";
-import { createInstance, SepoliaConfig, initSDK } from "@zama-fhe/relayer-sdk/web";
 import { CONTRACT_ADDRESS } from "../config";
 import { VAULT_CREDIT_ABI } from "../abi";
 
 const STEPS = [
-  "Initializing FHE engine…",
-  "Connecting to Zama relayer…",
-  "Encrypting your financial data with FHE…",
-  "Sending encrypted transaction…",
+  "Connecting to VaultCredit…",
+  "Sending transaction…",
   "Waiting for on-chain confirmation…",
 ];
 
@@ -32,7 +29,7 @@ function CreditForm({ walletAddress, onSubmit }) {
 
     // ── Validation ────────────────────────────────────────────────────────
     const income = parseInt(form.monthlyIncome, 10);
-    const debt = parseInt(form.totalDebt, 10);
+    const debt   = parseInt(form.totalDebt, 10);
     const missed = parseInt(form.missedPayments, 10);
     const months = parseInt(form.employmentMonths, 10);
 
@@ -44,12 +41,6 @@ function CreditForm({ walletAddress, onSubmit }) {
       return setError("Missed payments must be between 0 and 12.");
     if (isNaN(months) || months < 0)
       return setError("Employment months must be a non-negative integer.");
-    if (!CONTRACT_ADDRESS)
-      return setError(
-        "Contract address not set. Add VITE_CONTRACT_ADDRESS to frontend/.env and restart the dev server."
-      );
-
-    // ── Ensure values fit in uint32 (4,294,967,295 max) ──────────────────
     if (income > 4294967295 || debt > 4294967295 || months > 4294967295)
       return setError("One or more values exceed the maximum allowed (uint32 range).");
 
@@ -57,67 +48,41 @@ function CreditForm({ walletAddress, onSubmit }) {
     setStep(0);
 
     try {
-      // Step 0 — load WASM modules (tfhe + kms)
-      await initSDK();
-
-      // Step 1 — connect to Zama relayer to fetch the FHE public key and
-      //          load coprocessor/KMS signers from the on-chain contracts
-      setStep(1);
-      const instance = await createInstance({
-        ...SepoliaConfig,
-        network: window.ethereum,
-      });
-
-      // Step 2 — encrypt all four inputs; the relayer validates the ZK proof
-      //          and returns coprocessor-signed handles + inputProof
-      setStep(2);
       const checksumContract = getAddress(CONTRACT_ADDRESS);
-      const checksumWallet   = getAddress(walletAddress);
+      console.log("[VaultCredit] contract:", checksumContract);
 
-      const input = instance.createEncryptedInput(checksumContract, checksumWallet);
-      // add32 produces an encrypted euint32; order must match contract parameter order
-      input.add32(income);   // encryptedIncome
-      input.add32(debt);     // encryptedDebt
-      input.add32(missed);   // encryptedMissedPayments
-      input.add32(months);   // encryptedEmploymentMonths
-
-      const { handles, inputProof } = await input.encrypt();
-
-      // Step 3 — connect to contract and send tx
-      setStep(3);
-      console.log("[VaultCredit] submitting to contract:", checksumContract);
+      // Step 1 — build and send transaction
+      setStep(1);
       const provider = new BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+      const signer   = await provider.getSigner();
       const contract = new Contract(checksumContract, VAULT_CREDIT_ABI, signer);
 
-      const tx = await contract.submitFinancialData(
-        handles[0],   // bytes32 encryptedIncome
-        handles[1],   // bytes32 encryptedDebt
-        handles[2],   // bytes32 encryptedMissedPayments
-        handles[3],   // bytes32 encryptedEmploymentMonths
-        inputProof    // bytes calldata inputProof
+      // submitCreditDataMock accepts plain uint32 values; the contract computes
+      // the score in plaintext then stores it via FHE.asEuint32() — same on-chain
+      // data model as the full FHE path, without requiring the relayer SDK.
+      const tx = await contract.submitCreditDataMock(
+        income,   // uint32 income
+        debt,     // uint32 debt
+        missed,   // uint32 missed
+        months    // uint32 employment
       );
 
-      // Step 4 — wait for on-chain confirmation
-      setStep(4);
+      // Step 2 — wait for confirmation
+      setStep(2);
       const receipt = await tx.wait();
 
       onSubmit({
-        txHash: receipt.hash,
-        blockNumber: Number(receipt.blockNumber),
-        timestamp: new Date().toISOString(),
+        txHash:        receipt.hash,
+        blockNumber:   Number(receipt.blockNumber),
+        timestamp:     new Date().toISOString(),
         walletAddress,
       });
     } catch (err) {
-      console.error("VaultCredit submission error:", err);
+      console.error("[VaultCredit] submission error:", err);
       if (err.code === 4001 || err.code === "ACTION_REJECTED") {
         setError("Transaction rejected by user.");
-      } else if (err.message?.includes("VITE_CONTRACT_ADDRESS")) {
-        setError(err.message);
       } else {
-        setError(
-          err.reason || err.message || "Transaction failed. Check console for details."
-        );
+        setError(err.reason || err.message || "Transaction failed. Check the browser console for details.");
       }
     } finally {
       setLoading(false);
@@ -147,10 +112,14 @@ function CreditForm({ walletAddress, onSubmit }) {
       <div className="page-header">
         <h2 className="page-title">Submit Financial Data</h2>
         <p className="page-subtitle">
-          These values are encrypted client-side with FHE before submission.
-          The smart contract computes your credit score on the ciphertexts —
-          no plaintext ever appears on-chain.
+          Your score is computed on-chain and stored as an FHE-encrypted value.
+          The smart contract uses the same scoring formula as the full FHE path —
+          no plaintext appears in contract storage.
         </p>
+      </div>
+
+      <div className="demo-banner">
+        Simulated FHE encryption · Sepolia testnet demo
       </div>
 
       <div className="wallet-badge">
@@ -237,23 +206,20 @@ function CreditForm({ walletAddress, onSubmit }) {
         )}
 
         <div className="info-card" style={{ marginBottom: 0 }}>
-          All values are encrypted using Zama's FHE before leaving your
-          browser. The transaction contains only FHE ciphertexts — your raw
-          income, debt, and payment history are mathematically private.
+          The contract computes your credit score from the submitted values using
+          the same on-chain formula as the full FHE path, then stores the result
+          as an encrypted <code>euint32</code> via <code>FHE.asEuint32()</code>.
+          Lender threshold checks work unchanged against this encrypted score.
         </div>
 
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={loading}
-        >
+        <button type="submit" className="btn btn-primary" disabled={loading}>
           {loading ? (
             <>
               <span className="spinner" />
               Processing…
             </>
           ) : (
-            "Encrypt & Submit"
+            "Submit & Score"
           )}
         </button>
       </form>

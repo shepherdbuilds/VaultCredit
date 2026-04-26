@@ -14,7 +14,9 @@
       "Bash(nslookup relayer.testnet.zama.org)",
       "Bash(node -e ' *)",
       "Bash(pkill -f \"vite\")",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(npx hardhat *)"
     ]
   }
 }

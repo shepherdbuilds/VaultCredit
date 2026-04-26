@@ -4,7 +4,10 @@
 // ebool            → uint256 in ABI
 
 export const VAULT_CREDIT_ABI = [
-  // User submits 4 encrypted fields + shared ZK proof
+  // Testnet demo: accepts plain uint values, scores in plaintext, stores as FHE euint32
+  "function submitCreditDataMock(uint32 income, uint32 debt, uint32 missed, uint32 employment) external",
+
+  // Full FHE path: all four inputs must be encrypted client-side via Zama relayer SDK
   "function submitFinancialData(bytes32 encryptedIncome, bytes32 encryptedDebt, bytes32 encryptedMissedPayments, bytes32 encryptedEmploymentMonths, bytes calldata inputProof) external",
 
   // Lender threshold check — returns encrypted boolean (uint256 handle)
