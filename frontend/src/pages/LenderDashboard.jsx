@@ -65,9 +65,10 @@ function LenderDashboard({ walletAddress }) {
 
       // Step 3 — send transaction
       setStep(3);
+      console.log("[VaultCredit] lender calling contract:", checksumContract);
       const provider = new BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const contract = new Contract(CONTRACT_ADDRESS, VAULT_CREDIT_ABI, signer);
+      const contract = new Contract(checksumContract, VAULT_CREDIT_ABI, signer);
 
       // Check if borrower has a score first
       const hasScore = await contract.hasScore(checksumBorrower);

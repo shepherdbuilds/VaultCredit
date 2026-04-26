@@ -85,9 +85,10 @@ function CreditForm({ walletAddress, onSubmit }) {
 
       // Step 3 — connect to contract and send tx
       setStep(3);
+      console.log("[VaultCredit] submitting to contract:", checksumContract);
       const provider = new BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const contract = new Contract(CONTRACT_ADDRESS, VAULT_CREDIT_ABI, signer);
+      const contract = new Contract(checksumContract, VAULT_CREDIT_ABI, signer);
 
       const tx = await contract.submitFinancialData(
         handles[0],   // bytes32 encryptedIncome
