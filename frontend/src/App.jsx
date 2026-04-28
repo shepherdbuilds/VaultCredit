@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NavBar from "./components/NavBar";
 import ConnectWallet from "./components/ConnectWallet";
 import CreditForm from "./components/CreditForm";
@@ -19,6 +19,17 @@ function App() {
   const [walletAddress, setWalletAddress] = useState("");
   const [lenderAddress, setLenderAddress] = useState("");
   const [txResult, setTxResult] = useState(null);
+
+  const [isDark, setIsDark] = useState(() =>
+    localStorage.getItem("vc-theme") === "dark"
+  );
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+    localStorage.setItem("vc-theme", isDark ? "dark" : "light");
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark((d) => !d);
 
   const nav = (target) => setPage(target);
 
@@ -62,6 +73,8 @@ function App() {
         <LandingPage
           onBorrower={() => nav("borrower-connect")}
           onLender={() => nav("lender-connect")}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
         />
       </div>
     );

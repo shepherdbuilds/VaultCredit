@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { JsonRpcProvider, Contract } from "ethers";
 import { CONTRACT_ADDRESS, SEPOLIA_RPC_URL } from "../config";
 import { VAULT_CREDIT_ABI } from "../abi";
+import ThemeToggle from "../components/ThemeToggle";
 
 function useCountUp(target, duration = 1200) {
   const [count, setCount] = useState(0);
@@ -148,7 +149,7 @@ function useLiveStats() {
   return stats;
 }
 
-function LandingPage({ onBorrower, onLender }) {
+function LandingPage({ onBorrower, onLender, isDark, onToggleTheme }) {
   const stats = useLiveStats();
   const animatedScores  = useCountUp(stats.totalScores);
   const animatedWallets = useCountUp(stats.uniqueWallets);
@@ -175,6 +176,12 @@ function LandingPage({ onBorrower, onLender }) {
 
   return (
     <div className="landing-page" ref={containerRef}>
+
+      {/* ── Landing navbar ── */}
+      <header className="landing-nav">
+        <span className="landing-nav-wordmark">VaultCredit</span>
+        <ThemeToggle isDark={isDark} onToggle={onToggleTheme} />
+      </header>
 
       {/* ── Snap 1: Hero ── */}
       <div className="snap-section">
