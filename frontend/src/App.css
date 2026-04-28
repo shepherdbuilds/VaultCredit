@@ -24,7 +24,7 @@ html, body {
   color: var(--text-primary);
   font-family: var(--font);
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.8;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -37,9 +37,11 @@ html, body {
   background: var(--bg);
 }
 
-/* Landing: full-width, no centering padding */
+/* Landing: clip to 100vh so .landing-page is the scroll container */
 .app--landing {
   align-items: stretch;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Flow: navbar + centered 480px form */
@@ -313,11 +315,15 @@ html, body {
   font-weight: 500;
   font-family: var(--font);
   cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease, opacity 0.15s;
   border: none;
   text-align: center;
   text-decoration: none;
   width: 100%;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .btn-primary {
@@ -327,6 +333,7 @@ html, body {
 
 .btn-primary:hover:not(:disabled) {
   background: var(--blue-hover);
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.18);
 }
 
 .btn-primary:disabled {
@@ -342,6 +349,7 @@ html, body {
 
 .btn-secondary:hover:not(:disabled) {
   background: var(--bg);
+  border-color: #CBD5E1;
 }
 
 /* ─── Error / Loading ─────────────────────────────────────────────────── */
@@ -633,6 +641,52 @@ html, body {
 /* ─── Landing page ────────────────────────────────────────────────────── */
 .landing-page {
   width: 100%;
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+/* ── Scroll-snap sections ─────────────────────────────────────────────── */
+.snap-section {
+  min-height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* Last section starts at top so Protocol + Footer aren't clipped */
+.snap-section--last {
+  justify-content: flex-start;
+}
+
+/* Fade-up entrance — triggered by IntersectionObserver adding .is-visible */
+.snap-content {
+  width: 100%;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.snap-content.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* FHE diagram snap section */
+.fhe-snap-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 64px 24px;
+}
+
+/* Reduce hero top padding — snap-section provides the vertical centering */
+.snap-section .hero {
+  padding-top: 48px;
 }
 
 .landing-section {
@@ -643,7 +697,7 @@ html, body {
 
 /* Hero */
 .hero {
-  padding: 72px 24px 64px;
+  padding: 96px 24px 80px;
   text-align: center;
   max-width: 700px;
   margin: 0 auto;
@@ -660,25 +714,25 @@ html, body {
 }
 
 .hero-title {
-  font-size: 40px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
   color: var(--text-primary);
-  line-height: 1.15;
-  margin-bottom: 20px;
+  line-height: 1.1;
+  margin-bottom: 24px;
 }
 
 .hero-tagline {
   font-size: 17px;
   color: var(--text-secondary);
-  line-height: 1.65;
+  line-height: 1.75;
   max-width: 520px;
-  margin: 0 auto 36px;
+  margin: 0 auto 44px;
 }
 
 .hero-buttons {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -686,6 +740,18 @@ html, body {
 .hero-buttons .btn {
   width: auto;
   min-width: 200px;
+}
+
+/* Hero secondary: border-only, no fill */
+.hero-buttons .btn-secondary {
+  background: transparent;
+  border: 1.5px solid #CBD5E1;
+  color: var(--text-primary);
+}
+
+.hero-buttons .btn-secondary:hover:not(:disabled) {
+  background: transparent;
+  border-color: var(--text-primary);
 }
 
 .hero-note {
@@ -696,10 +762,15 @@ html, body {
 
 /* Stats bar */
 .stats-bar {
+  background: var(--white);
+  padding: 48px 24px;
+}
+
+/* When stats bar lives inside a snap section, add subtle top/bottom rules */
+.snap-section .stats-bar {
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  background: var(--white);
-  padding: 20px 24px;
+  width: 100%;
 }
 
 .stats-bar-inner {
@@ -707,28 +778,45 @@ html, body {
   margin: 0 auto;
   display: flex;
   justify-content: center;
-  gap: 48px;
+  gap: 64px;
   flex-wrap: wrap;
 }
 
 .stat-item {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 }
 
 .stat-number {
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0F172A;
   display: block;
-  margin-bottom: 2px;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.stat-number::after {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: #1D4ED8;
+  border-radius: 2px;
+  margin: 8px auto 0;
 }
 
 .stat-label {
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: 0.03em;
+  color: #64748B;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 4px;
 }
 
 /* How it works */
@@ -748,26 +836,54 @@ html, body {
 }
 
 .section-title {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
   color: var(--text-primary);
   margin-bottom: 36px;
-  line-height: 1.3;
+  line-height: 1.25;
+}
+
+.steps-track {
+  position: relative;
+}
+
+/* Animated connecting line — drawn at step-number circle height (padding 20px + half circle 14px = 34px) */
+.steps-track::before {
+  content: '';
+  position: absolute;
+  top: 34px;
+  left: 34px;
+  right: 34px;
+  height: 1px;
+  background: var(--border);
+  z-index: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: line-grow 0.7s ease-out 0.4s forwards;
+}
+
+@keyframes line-grow {
+  to { transform: scaleX(1); }
 }
 
 .steps-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 600px) {
   .steps-grid {
     grid-template-columns: 1fr;
   }
+  .steps-track::before {
+    display: none;
+  }
   .hero-title {
-    font-size: 28px;
+    font-size: 34px;
   }
 }
 
@@ -777,6 +893,13 @@ html, body {
   border-radius: 10px;
   padding: 20px;
   box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #CBD5E1;
 }
 
 .step-number {
@@ -821,6 +944,13 @@ html, body {
   border-radius: 10px;
   padding: 24px 28px;
   box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.why-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #CBD5E1;
 }
 
 .why-card p {
@@ -1240,13 +1370,184 @@ html, body {
   min-width: 0;
 }
 
+/* ─── FHE Flow Diagram ────────────────────────────────────────────────── */
+.fhe-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 36px auto 40px;
+  flex-wrap: nowrap;
+}
+
+.fhe-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 90px;
+  box-shadow: var(--shadow);
+}
+
+.fhe-node-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.fhe-connector {
+  position: relative;
+  width: 48px;
+  height: 2px;
+  flex-shrink: 0;
+}
+
+.fhe-connector-line {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to right,
+    var(--border) 0,
+    var(--border) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  border-radius: 1px;
+}
+
+.fhe-dot {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: dot-travel 2.4s ease-in-out infinite;
+}
+
+@keyframes dot-travel {
+  0%   { left: 0;    opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { left: calc(100% - 8px); opacity: 0; }
+}
+
+/* ─── Landing Footer ──────────────────────────────────────────────────── */
+.landing-footer {
+  background: #F1F5F9;
+  border-top: 1px solid var(--border);
+  padding: 24px;
+  margin-top: 0;
+}
+
+.landing-footer-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.landing-footer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.landing-footer-wordmark {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.landing-footer-powered {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.landing-footer-powered a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.landing-footer-powered a:hover {
+  text-decoration: underline;
+}
+
+.landing-footer-github {
+  font-size: 13px;
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.landing-footer-github:hover {
+  text-decoration: underline;
+}
+
+.landing-footer-contract {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.landing-footer-contract a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.landing-footer-contract a:hover {
+  color: var(--blue);
+  text-decoration: underline;
+}
+
 /* ─── Responsive tweaks ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Disable scroll-snap on mobile — fall back to normal scroll */
+  .app--landing {
+    height: auto;
+    overflow: visible;
+  }
+  .landing-page {
+    height: auto;
+    overflow-y: visible;
+    scroll-snap-type: none;
+  }
+  .snap-section {
+    min-height: auto;
+    scroll-snap-align: none;
+  }
+  .snap-content {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .snap-section .hero {
+    padding-top: 96px;
+  }
+}
+
 @media (max-width: 480px) {
   .page {
     padding: 28px 20px;
   }
   .hero {
     padding: 48px 20px 40px;
+  }
+  .snap-section .hero {
+    padding-top: 48px;
   }
   .section, .why-section, .proto-stats {
     padding-left: 16px;
@@ -1257,5 +1558,21 @@ html, body {
   }
   .navbar-inner {
     padding: 0 16px;
+  }
+  .fhe-diagram {
+    display: grid;
+    grid-template-columns: 1fr 32px 1fr;
+    grid-template-rows: auto auto;
+    gap: 12px 0;
+    justify-items: center;
+  }
+  .fhe-connector {
+    width: 32px;
+    align-self: center;
+  }
+  .landing-footer-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }

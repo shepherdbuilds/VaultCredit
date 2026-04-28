@@ -63,13 +63,6 @@ function App() {
           onBorrower={() => nav("borrower-connect")}
           onLender={() => nav("lender-connect")}
         />
-        <footer className="app-footer" style={{ textAlign: "center", padding: "32px 24px" }}>
-          <span>Powered by </span>
-          <a href="https://www.zama.ai/fhevm" target="_blank" rel="noopener noreferrer">
-            Zama fhEVM
-          </a>
-          <span> · Sepolia Testnet</span>
-        </footer>
       </div>
     );
   }
