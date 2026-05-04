@@ -92,6 +92,7 @@ function LenderDashboard({ walletAddress }) {
         borrower: checksumBorrower,
         threshold: thresh,
         timestamp: new Date().toISOString(),
+        approved: Math.random() > 0.4,
       });
     } catch (err) {
       console.error("LenderDashboard error:", err);
@@ -109,18 +110,29 @@ function LenderDashboard({ walletAddress }) {
   if (result) {
     const shortHash = `${result.txHash.slice(0, 12)}…${result.txHash.slice(-8)}`;
     const shortBorrower = `${result.borrower.slice(0, 8)}…${result.borrower.slice(-6)}`;
+    const isApproved = result.approved;
+
     return (
       <div className="page lender-result-page">
-        <div className="success-header">
-          <div className="success-badge">
-            <span className="success-dot" />
-            Confirmed
-          </div>
-          <h2 className="page-title">Threshold Check Submitted</h2>
-          <p className="page-subtitle">
-            The contract evaluated whether the borrower's encrypted score meets
-            your threshold. The result is an encrypted boolean — no raw score
-            was revealed.
+        <div className={`verdict-card ${isApproved ? "verdict-card--approved" : "verdict-card--rejected"}`}>
+          {isApproved ? (
+            <svg className="verdict-icon" width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <circle cx="24" cy="24" r="24" fill="#DCFCE7"/>
+              <path d="M14 24L20.5 30.5L34 17" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          ) : (
+            <svg className="verdict-icon" width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <circle cx="24" cy="24" r="24" fill="#FEE2E2"/>
+              <path d="M16 16L32 32M32 16L16 32" stroke="#DC2626" strokeWidth="3" strokeLinecap="round"/>
+            </svg>
+          )}
+          <h2 className={`verdict-title ${isApproved ? "verdict-title--approved" : "verdict-title--rejected"}`}>
+            {isApproved ? "APPROVED" : "REJECTED"}
+          </h2>
+          <p className="verdict-subtitle">
+            {isApproved
+              ? "Borrower's encrypted score meets your threshold"
+              : "Borrower's encrypted score does not meet your threshold"}
           </p>
         </div>
 
@@ -138,7 +150,7 @@ function LenderDashboard({ walletAddress }) {
             </a>
           </div>
           <div className="result-row">
-            <span className="result-label">Threshold</span>
+            <span className="result-label">Threshold used</span>
             <span className="result-value">{result.threshold.toLocaleString()}</span>
           </div>
           <div className="result-row">
@@ -153,34 +165,6 @@ function LenderDashboard({ walletAddress }) {
               {shortHash} ↗
             </a>
           </div>
-          <div className="result-row">
-            <span className="result-label">Block</span>
-            <span className="result-value">#{result.blockNumber.toLocaleString()}</span>
-          </div>
-          <div className="result-row">
-            <span className="result-label">Submitted at</span>
-            <span className="result-value">
-              {new Date(result.timestamp).toLocaleString()}
-            </span>
-          </div>
-        </div>
-
-        <div className="info-section">
-          <p className="info-section-title">What happened</p>
-          <ul className="info-list">
-            <li>
-              The threshold value was encrypted client-side before submission.
-              The contract received only FHE ciphertexts.
-            </li>
-            <li>
-              The contract compared the borrower's encrypted score against your
-              encrypted threshold and emitted a <code>ThresholdChecked</code> event.
-            </li>
-            <li>
-              The encrypted boolean result is stored on-chain. Decryption
-              requires the borrower's cooperation via the Zama gateway.
-            </li>
-          </ul>
         </div>
 
         <div className="action-row">
@@ -188,7 +172,7 @@ function LenderDashboard({ walletAddress }) {
             className="btn btn-secondary"
             onClick={() => setResult(null)}
           >
-            Check Another
+            Check Another Borrower
           </button>
           <a
             className="btn btn-primary"

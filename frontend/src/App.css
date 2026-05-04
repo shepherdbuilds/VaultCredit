@@ -329,13 +329,6 @@ html, body {
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
   width: 100%;
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-.form-group input::-webkit-outer-spin-button,
-.form-group input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
 }
 
 .form-group input::placeholder {
@@ -481,6 +474,7 @@ html, body {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   margin-bottom: 14px;
+  animation: badge-scale-in 0.4s ease-out;
 }
 
 .success-dot {
@@ -489,6 +483,7 @@ html, body {
   border-radius: 50%;
   background: var(--text-success);
   flex-shrink: 0;
+  animation: pulse-success 2s ease-in-out infinite;
 }
 
 /* ─── Result Card ─────────────────────────────────────────────────────── */
@@ -1638,6 +1633,223 @@ html, body {
   text-decoration: underline;
 }
 
+/* ─── Transaction Stepper ────────────────────────────────────────────── */
+.tx-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.tx-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tx-step-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tx-step-pending {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.tx-step-label {
+  font-size: 13px;
+  color: var(--border-strong);
+  line-height: 1.4;
+  transition: color 0.2s ease;
+}
+
+.tx-step--done .tx-step-label {
+  color: var(--text-secondary);
+}
+
+.tx-step--active .tx-step-label {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.tx-step--final .tx-step-label {
+  color: var(--text-success);
+  font-weight: 600;
+}
+
+.tx-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ─── Verdict Cards (Lender result) ──────────────────────────────────── */
+.verdict-card {
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  animation: verdict-fade-in 0.4s ease-out;
+  margin-bottom: 24px;
+}
+
+.verdict-card--approved {
+  background: var(--surface-success);
+  border: 1px solid var(--border-success);
+}
+
+.verdict-card--rejected {
+  background: var(--surface-error);
+  border: 1px solid var(--border-error);
+}
+
+.verdict-icon {
+  display: block;
+  margin: 0 auto 16px;
+}
+
+.verdict-title {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.verdict-title--approved {
+  color: var(--text-success);
+}
+
+.verdict-title--rejected {
+  color: var(--text-error);
+}
+
+.verdict-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+@keyframes verdict-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Confirmed badge scale-in animation ──────────────────────────────── */
+@keyframes badge-scale-in {
+  from { transform: scale(0.3); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes pulse-success {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+/* ─── Page title large variant ────────────────────────────────────────── */
+.page-title--lg {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+/* ─── Transaction hash with copy button ───────────────────────────────── */
+.tx-hash-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tx-hash-value {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.tx-hash-value:hover {
+  text-decoration: underline;
+}
+
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--white);
+  cursor: pointer;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.copy-btn:hover {
+  background: var(--bg);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.copy-btn--copied {
+  border-color: var(--text-success);
+  color: var(--text-success);
+}
+
+/* ─── Motivational privacy line ───────────────────────────────────────── */
+.motivational-line {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.75;
+  padding: 8px 0 4px;
+  font-style: italic;
+}
+
+/* ─── Empty state (history) ───────────────────────────────────────────── */
+.history-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 16px;
+  text-align: center;
+}
+
+.history-empty-icon {
+  margin-bottom: 4px;
+  line-height: 0;
+}
+
+.history-empty-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.history-empty-subtext {
+  font-size: 12px;
+  color: var(--border-strong);
+  line-height: 1.6;
+  max-width: 280px;
+}
+
 /* ─── Responsive tweaks ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
   /* Disable scroll-snap on mobile — fall back to normal scroll */
@@ -1662,6 +1874,30 @@ html, body {
   .snap-section .hero {
     padding-top: 96px;
   }
+  /* FHE diagram: 2×2 grid, no connecting lines */
+  .fhe-diagram {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    justify-items: center;
+  }
+  .fhe-connector {
+    display: none;
+  }
+  /* Stats bar: stack vertically */
+  .stats-bar-inner {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+  /* Lender result: full width (already full-width inside .page, but ensure verdict card spans) */
+  .verdict-card {
+    width: 100%;
+  }
+  /* Stepper: full width */
+  .tx-stepper {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1683,17 +1919,6 @@ html, body {
   }
   .navbar-inner {
     padding: 0 16px;
-  }
-  .fhe-diagram {
-    display: grid;
-    grid-template-columns: 1fr 32px 1fr;
-    grid-template-rows: auto auto;
-    gap: 12px 0;
-    justify-items: center;
-  }
-  .fhe-connector {
-    width: 32px;
-    align-self: center;
   }
   .landing-footer-top {
     flex-direction: column;

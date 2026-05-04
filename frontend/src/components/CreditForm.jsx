@@ -3,10 +3,11 @@ import { BrowserProvider, Contract, getAddress } from "ethers";
 import { CONTRACT_ADDRESS } from "../config";
 import { VAULT_CREDIT_ABI } from "../abi";
 
-const STEPS = [
-  "Connecting to VaultCredit…",
-  "Sending transaction…",
-  "Waiting for on-chain confirmation…",
+const TX_STEPS = [
+  "Encrypting your financial data...",
+  "Submitting to blockchain...",
+  "Waiting for confirmation...",
+  "Score stored on-chain",
 ];
 
 function CreditForm({ walletAddress, onSubmit }) {
@@ -71,6 +72,10 @@ function CreditForm({ walletAddress, onSubmit }) {
       setStep(2);
       const receipt = await tx.wait();
 
+      // Step 3 — confirmed on-chain
+      setStep(3);
+      await new Promise((r) => setTimeout(r, 700));
+
       onSubmit({
         txHash:        receipt.hash,
         blockNumber:   Number(receipt.blockNumber),
@@ -133,12 +138,12 @@ function CreditForm({ walletAddress, onSubmit }) {
           <input
             id="monthlyIncome"
             name="monthlyIncome"
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="e.g. 6500"
             value={form.monthlyIncome}
             onChange={handleChange}
-            min="0"
-            max="4294967295"
             required
             disabled={loading}
           />
@@ -150,12 +155,12 @@ function CreditForm({ walletAddress, onSubmit }) {
           <input
             id="totalDebt"
             name="totalDebt"
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="e.g. 12000"
             value={form.totalDebt}
             onChange={handleChange}
-            min="0"
-            max="4294967295"
             required
             disabled={loading}
           />
@@ -167,12 +172,12 @@ function CreditForm({ walletAddress, onSubmit }) {
           <input
             id="missedPayments"
             name="missedPayments"
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="e.g. 0"
             value={form.missedPayments}
             onChange={handleChange}
-            min="0"
-            max="12"
             required
             disabled={loading}
           />
@@ -184,12 +189,12 @@ function CreditForm({ walletAddress, onSubmit }) {
           <input
             id="employmentMonths"
             name="employmentMonths"
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="e.g. 36"
             value={form.employmentMonths}
             onChange={handleChange}
-            min="0"
-            max="4294967295"
             required
             disabled={loading}
           />
@@ -199,9 +204,42 @@ function CreditForm({ walletAddress, onSubmit }) {
         {error && <div className="error-box">{error}</div>}
 
         {loading && (
-          <div className="loading-box">
-            <span className="spinner" />
-            <span>{STEPS[step]}</span>
+          <div className="tx-stepper">
+            {TX_STEPS.map((label, i) => {
+              const isCompleted = i < step;
+              const isCurrent = i === step;
+              const isFinalStep = i === TX_STEPS.length - 1;
+              return (
+                <div
+                  key={i}
+                  className={[
+                    "tx-step",
+                    isCompleted ? "tx-step--done" : "",
+                    isCurrent && !isFinalStep ? "tx-step--active" : "",
+                    isCurrent && isFinalStep ? "tx-step--final" : "",
+                  ].filter(Boolean).join(" ")}
+                >
+                  <div className="tx-step-icon">
+                    {isCompleted ? (
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <path d="M2.5 7L5.5 10L11.5 4" stroke="#2563EB" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    ) : isCurrent && isFinalStep ? (
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <path d="M2.5 7L5.5 10L11.5 4" stroke="#16A34A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    ) : isCurrent ? (
+                      <span className="tx-spinner" />
+                    ) : (
+                      <span className="tx-step-pending" />
+                    )}
+                  </div>
+                  <span className="tx-step-label">
+                    {label}{isCurrent && isFinalStep ? " ✓" : ""}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
 

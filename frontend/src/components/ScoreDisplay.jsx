@@ -54,6 +54,16 @@ function ScoreDisplay({ txResult, walletAddress, onReset }) {
     ? new Date(txResult.timestamp).toLocaleString()
     : "—";
 
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (!txResult?.txHash) return;
+    navigator.clipboard.writeText(txResult.txHash).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   const { history, historyLoading } = useScoreHistory(walletAddress);
 
   return (
@@ -80,7 +90,7 @@ function ScoreDisplay({ txResult, walletAddress, onReset }) {
           <span className="success-dot" />
           Confirmed
         </div>
-        <h2 className="page-title">Credit Score Computed</h2>
+        <h2 className="page-title page-title--lg">Credit Score Computed</h2>
         <p className="page-subtitle">
           Your encrypted credit score has been stored on Sepolia. Raw financial
           data was never on-chain — only FHE ciphertexts.
@@ -95,15 +105,33 @@ function ScoreDisplay({ txResult, walletAddress, onReset }) {
         <div className="result-row">
           <span className="result-label">Transaction</span>
           {txResult?.txHash ? (
-            <a
-              className="result-link"
-              href={`https://sepolia.etherscan.io/tx/${txResult.txHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={txResult.txHash}
-            >
-              {shortHash} ↗
-            </a>
+            <div className="tx-hash-row">
+              <a
+                className="tx-hash-value"
+                href={`https://sepolia.etherscan.io/tx/${txResult.txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={txResult.txHash}
+              >
+                {shortHash} ↗
+              </a>
+              <button
+                className={`copy-btn${copied ? " copy-btn--copied" : ""}`}
+                onClick={handleCopy}
+                title="Copy full transaction hash"
+              >
+                {copied ? (
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6L4.5 8.5L10 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <rect x="3.5" y="0.5" width="7" height="7.5" rx="1" stroke="currentColor" strokeWidth="1.1"/>
+                    <rect x="0.5" y="3.5" width="7" height="7.5" rx="1" stroke="currentColor" strokeWidth="1.1" fill="var(--white)"/>
+                  </svg>
+                )}
+              </button>
+            </div>
           ) : (
             <span className="result-value">—</span>
           )}
@@ -123,6 +151,11 @@ function ScoreDisplay({ txResult, walletAddress, onReset }) {
           <span className="result-value">{formattedTime}</span>
         </div>
       </div>
+
+      <p className="motivational-line">
+        Your financial data was never exposed.<br />
+        Only you and authorized lenders can verify your score.
+      </p>
 
       <div className="info-section">
         <p className="info-section-title">What this means</p>
@@ -154,7 +187,18 @@ function ScoreDisplay({ txResult, walletAddress, onReset }) {
             <span className="spinner" /> Loading events…
           </div>
         ) : history.length === 0 ? (
-          <p className="history-empty">No previous submissions found on-chain.</p>
+          <div className="history-empty-state">
+            <div className="history-empty-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" stroke="#CBD5E1" strokeWidth="1.5"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#CBD5E1" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <p className="history-empty-text">Your submission history will appear here</p>
+            <p className="history-empty-subtext">
+              Each entry shows only metadata — your score remains encrypted on-chain
+            </p>
+          </div>
         ) : (
           <div className="history-list">
             {history.map((item, i) => {
