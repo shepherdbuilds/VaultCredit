@@ -704,6 +704,7 @@ html, body {
 .snap-section {
   min-height: 100vh;
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -716,12 +717,12 @@ html, body {
   justify-content: flex-start;
 }
 
-/* Fade-up entrance — triggered by IntersectionObserver adding .is-visible */
+/* Page-turn settle — re-triggers on every snap via IntersectionObserver */
 .snap-content {
   width: 100%;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  opacity: 0.85;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
 }
 
 .snap-content.is-visible {
