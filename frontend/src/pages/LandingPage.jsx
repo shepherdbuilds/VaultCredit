@@ -1,29 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { JsonRpcProvider, Contract } from "ethers";
-import { CONTRACT_ADDRESS, SEPOLIA_RPC_URL } from "../config";
-import { VAULT_CREDIT_ABI } from "../abi";
+import { CONTRACT_ADDRESS } from "../config";
 import ThemeToggle from "../components/ThemeToggle";
-
-function useCountUp(target, duration = 1200) {
-  const [count, setCount] = useState(0);
-  const frameRef = useRef(null);
-
-  useEffect(() => {
-    if (target === null) return;
-    if (target === 0) { setCount(0); return; }
-    const start = performance.now();
-    function tick(now) {
-      const t = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setCount(Math.round(eased * target));
-      if (t < 1) frameRef.current = requestAnimationFrame(tick);
-    }
-    frameRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, [target, duration]);
-
-  return count;
-}
+import VaultLogo from "../components/VaultLogo";
 
 // ── FHE flow icons ────────────────────────────────────────────────────────────
 
@@ -87,7 +65,7 @@ function FheFlowDiagram() {
   );
 }
 
-// ── Landing page sections ─────────────────────────────────────────────────────
+// ── Landing page content ──────────────────────────────────────────────────────
 
 const STEPS = [
   {
@@ -122,56 +100,34 @@ const WHY_ITEMS = [
   },
 ];
 
-function useLiveStats() {
-  const [stats, setStats] = useState({ totalScores: 0, uniqueWallets: 0 });
-
-  useEffect(() => {
-    if (!CONTRACT_ADDRESS) return;
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const provider = new JsonRpcProvider(SEPOLIA_RPC_URL);
-        const contract = new Contract(CONTRACT_ADDRESS, VAULT_CREDIT_ABI, provider);
-        const events = await contract.queryFilter(contract.filters.ScoreComputed());
-        if (cancelled) return;
-        const wallets = new Set(events.map((e) => e.args.user.toLowerCase()));
-        setStats({ totalScores: events.length, uniqueWallets: wallets.size });
-      } catch {
-        setStats({ totalScores: 0, uniqueWallets: 0 });
-      }
-    }
-
-    load();
-    return () => { cancelled = true; };
-  }, []);
-
-  return stats;
-}
+const TOTAL_SECTIONS = 6;
 
 function LandingPage({ onBorrower, onLender, isDark, onToggleTheme }) {
-  const stats = useLiveStats();
-  const animatedScores  = useCountUp(stats.totalScores);
-  const animatedWallets = useCountUp(stats.uniqueWallets);
+  const [activeSection, setActiveSection] = useState(0);
   const containerRef = useRef(null);
 
   useEffect(() => {
     const root = containerRef.current;
     if (!root) return;
-    const els = root.querySelectorAll(".snap-content");
+    const sections = Array.from(root.querySelectorAll(".snap-section"));
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const content = entry.target.querySelector(".snap-content");
           if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
+            content?.classList.add("is-visible");
+            const idx = sections.indexOf(entry.target);
+            if (idx !== -1) setActiveSection(idx);
           } else {
-            entry.target.classList.remove("is-visible");
+            content?.classList.remove("is-visible");
           }
         });
       },
       { root, threshold: 0.5 }
     );
-    els.forEach((el) => observer.observe(el));
+
+    sections.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
@@ -180,9 +136,22 @@ function LandingPage({ onBorrower, onLender, isDark, onToggleTheme }) {
 
       {/* ── Landing navbar ── */}
       <header className="landing-nav">
-        <span className="landing-nav-wordmark">VaultCredit</span>
+        <span className="landing-nav-wordmark">
+          <VaultLogo />
+          VaultCredit
+        </span>
         <ThemeToggle isDark={isDark} onToggle={onToggleTheme} />
       </header>
+
+      {/* ── Scroll progress dots ── */}
+      <nav className="snap-progress" aria-label="Page sections">
+        {Array.from({ length: TOTAL_SECTIONS }).map((_, i) => (
+          <div
+            key={i}
+            className={`snap-dot${i === activeSection ? " snap-dot--active" : ""}`}
+          />
+        ))}
+      </nav>
 
       {/* ── Snap 1: Hero ── */}
       <div className="snap-section">
@@ -217,24 +186,36 @@ function LandingPage({ onBorrower, onLender, isDark, onToggleTheme }) {
         </div>
       </div>
 
-      {/* ── Snap 3: Stats ── */}
-      <div className="snap-section">
+      {/* ── Snap 3: Why VaultCredit exists (dark) ── */}
+      <div className="snap-section snap-section--dark">
         <div className="snap-content">
-          <div className="stats-bar">
-            <div className="stats-bar-inner">
-              <div className="stat-item">
-                <span className="stat-number">{animatedScores.toLocaleString()}</span>
-                <span className="stat-label">Scores computed</span>
+          <div className="trust-section">
+            <h2 className="trust-headline">
+              The problem is trust.<br />We eliminated it.
+            </h2>
+            <div className="trust-cards">
+              <div className="trust-card">
+                <div className="trust-card-accent" />
+                <div className="trust-number">$600M+</div>
+                <div className="trust-label">Lost to DeFi hacks in Q1 2026</div>
+                <div className="trust-subtext">Protocols forced to expose sensitive data layers</div>
               </div>
-              <div className="stat-item">
-                <span className="stat-number">{animatedWallets.toLocaleString()}</span>
-                <span className="stat-label">Unique wallets</span>
+              <div className="trust-card">
+                <div className="trust-card-accent" />
+                <div className="trust-number">2.8B+</div>
+                <div className="trust-label">People lack access to fair credit</div>
+                <div className="trust-subtext">Traditional systems exclude the underbanked globally</div>
               </div>
-              <div className="stat-item">
-                <span className="stat-number">Sepolia</span>
-                <span className="stat-label">Network</span>
+              <div className="trust-card">
+                <div className="trust-card-accent" />
+                <div className="trust-number">0</div>
+                <div className="trust-label">Bytes of plaintext on VaultCredit</div>
+                <div className="trust-subtext">Every input encrypted before it leaves your browser</div>
               </div>
             </div>
+            <p className="trust-tagline">
+              VaultCredit is the first protocol where the math itself is the guarantee.
+            </p>
           </div>
         </div>
       </div>
@@ -276,7 +257,7 @@ function LandingPage({ onBorrower, onLender, isDark, onToggleTheme }) {
         </div>
       </div>
 
-      {/* ── Snap 6: CTA cards + Protocol + Footer ── */}
+      {/* ── Snap 6: CTA + Protocol + Footer ── */}
       <div className="snap-section snap-section--last">
         <div className="snap-content">
           <section className="section">
@@ -329,7 +310,10 @@ function LandingPage({ onBorrower, onLender, isDark, onToggleTheme }) {
           <footer className="landing-footer">
             <div className="landing-footer-inner">
               <div className="landing-footer-top">
-                <span className="landing-footer-wordmark">VaultCredit</span>
+                <span className="landing-footer-wordmark">
+                  <VaultLogo />
+                  VaultCredit
+                </span>
                 <span className="landing-footer-powered">
                   Powered by{" "}
                   <a href="https://www.zama.ai/fhevm" target="_blank" rel="noopener noreferrer">

@@ -1,3 +1,5 @@
+import VaultLogo from "./VaultLogo";
+
 function NavBar({ page, walletAddress, onNav, onDisconnect }) {
   const isBorrower =
     page === "borrower-connect" ||
@@ -16,6 +18,7 @@ function NavBar({ page, walletAddress, onNav, onDisconnect }) {
     <nav className="navbar">
       <div className="navbar-inner">
         <button className="nav-wordmark" onClick={() => onNav("landing")}>
+          <VaultLogo />
           VaultCredit
         </button>
 

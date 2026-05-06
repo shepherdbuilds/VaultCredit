@@ -616,6 +616,9 @@ html, body {
   padding: 0;
   font-family: var(--font);
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .nav-wordmark:hover {
@@ -702,19 +705,30 @@ html, body {
 
 /* ── Scroll-snap sections ─────────────────────────────────────────────── */
 .snap-section {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   scroll-snap-align: start;
   scroll-snap-stop: always;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: stretch;
+  align-items: center;
   width: 100%;
+  box-sizing: border-box;
 }
 
-/* Last section starts at top so Protocol + Footer aren't clipped */
+/* Last section: taller content, starts at top */
 .snap-section--last {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
   justify-content: flex-start;
+  align-items: stretch;
+}
+
+/* Dark contrast section */
+.snap-section--dark {
+  background: #0F172A;
 }
 
 /* Page-turn settle — re-triggers on every snap via IntersectionObserver */
@@ -738,9 +752,10 @@ html, body {
   padding: 64px 24px;
 }
 
-/* Reduce hero top padding — snap-section provides the vertical centering */
+/* snap-section centers the hero, trim excess padding so it's truly centered */
 .snap-section .hero {
-  padding-top: 48px;
+  padding-top: 24px;
+  padding-bottom: 24px;
 }
 
 .landing-section {
@@ -1393,6 +1408,9 @@ html, body {
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ─── CTA pair ────────────────────────────────────────────────────────── */
@@ -1591,6 +1609,9 @@ html, body {
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .landing-footer-powered {
@@ -1632,6 +1653,127 @@ html, body {
 .landing-footer-contract a:hover {
   color: var(--blue);
   text-decoration: underline;
+}
+
+/* ─── Vault logo ──────────────────────────────────────────────────────── */
+.vault-logo {
+  color: #1D4ED8;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .vault-logo {
+  color: #FFFFFF;
+}
+
+/* ─── Scroll progress dots ────────────────────────────────────────────── */
+.snap-progress {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  pointer-events: none;
+  list-style: none;
+}
+
+.snap-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid #CBD5E1;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.snap-dot--active {
+  background: #1D4ED8;
+  border-color: #1D4ED8;
+  transform: scale(1.25);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .snap-dot {
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .snap-dot--active {
+  background: #3B82F6;
+  border-color: #3B82F6;
+}
+
+/* ─── Trust section (dark snap) ───────────────────────────────────────── */
+.trust-section {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 40px;
+  text-align: center;
+  width: 100%;
+}
+
+.trust-headline {
+  font-size: 36px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin-bottom: 56px;
+}
+
+.trust-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+}
+
+.trust-card {
+  text-align: left;
+}
+
+.trust-card-accent {
+  width: 40px;
+  height: 3px;
+  background: #1D4ED8;
+  border-radius: 2px;
+  margin-bottom: 16px;
+}
+
+.trust-number {
+  font-size: 56px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 12px;
+  font-family: var(--font);
+}
+
+.trust-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94A3B8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.trust-subtext {
+  font-size: 13px;
+  color: #64748B;
+  line-height: 1.6;
+}
+
+.trust-tagline {
+  font-size: 16px;
+  color: #94A3B8;
+  font-style: italic;
+  line-height: 1.65;
+  margin-top: 48px;
 }
 
 /* ─── Transaction Stepper ────────────────────────────────────────────── */
@@ -1875,6 +2017,19 @@ html, body {
   .snap-section .hero {
     padding-top: 96px;
   }
+  /* Snap sections: fall back to normal block flow */
+  .snap-section {
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+  }
+  .snap-section--last {
+    min-height: auto;
+  }
+  /* Hide progress dots on mobile */
+  .snap-progress {
+    display: none;
+  }
   /* FHE diagram: 2×2 grid, no connecting lines */
   .fhe-diagram {
     display: grid;
@@ -1885,13 +2040,28 @@ html, body {
   .fhe-connector {
     display: none;
   }
+  /* Trust cards: stack vertically */
+  .trust-cards {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .trust-headline {
+    font-size: 26px;
+    margin-bottom: 40px;
+  }
+  .trust-number {
+    font-size: 42px;
+  }
+  .trust-section {
+    padding: 48px 24px;
+  }
   /* Stats bar: stack vertically */
   .stats-bar-inner {
     flex-direction: column;
     align-items: center;
     gap: 32px;
   }
-  /* Lender result: full width (already full-width inside .page, but ensure verdict card spans) */
+  /* Lender result: full width */
   .verdict-card {
     width: 100%;
   }
