@@ -1,15 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 28" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 26" fill="none">
   <path
-    d="M11 1L2 5.5V13C2 19.5 6 25.5 11 27.5C16 25.5 20 19.5 20 13V5.5L11 1Z"
-    stroke="#1D4ED8"
-    stroke-width="1.6"
-    stroke-linejoin="round"
+    d="M11 1L2 5V12C2 18.5 6.5 23.5 11 25.5C15.5 23.5 20 18.5 20 12V5L11 1Z"
     fill="#1D4ED8"
-    fill-opacity="0.1"
   />
   <path
-    d="M7.5 11L11 17.5L14.5 11"
-    stroke="#1D4ED8"
+    d="M7.5 9L11 17L14.5 9"
+    stroke="white"
     stroke-width="2"
     stroke-linecap="round"
     stroke-linejoin="round"

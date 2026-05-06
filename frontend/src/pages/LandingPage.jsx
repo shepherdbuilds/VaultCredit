@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CONTRACT_ADDRESS } from "../config";
 import ThemeToggle from "../components/ThemeToggle";
+import VaultCreditLogo from "../components/VaultCreditLogo";
 
 // ── FHE flow icons ────────────────────────────────────────────────────────────
 
@@ -136,7 +137,7 @@ function LandingPage({ onBorrower, onLender, isDark, onToggleTheme }) {
       {/* ── Landing navbar ── */}
       <header className="landing-nav">
         <span className="landing-nav-wordmark">
-          <img src="/logo.png" alt="VaultCredit" className="nav-logo-img" />
+          <VaultCreditLogo />
         </span>
         <ThemeToggle isDark={isDark} onToggle={onToggleTheme} />
       </header>
@@ -309,7 +310,7 @@ function LandingPage({ onBorrower, onLender, isDark, onToggleTheme }) {
             <div className="landing-footer-inner">
               <div className="landing-footer-top">
                 <span className="landing-footer-wordmark">
-                  <img src="/logo.png" alt="VaultCredit" className="footer-logo-img" />
+                  <VaultCreditLogo iconSize={20} fontSize={14} gap={6} />
                 </span>
                 <span className="landing-footer-powered">
                   Powered by{" "}
