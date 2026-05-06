@@ -16,7 +16,14 @@
       "Bash(pkill -f \"vite\")",
       "Bash(node *)",
       "Bash(echo \"exit:$?\")",
-      "Bash(npx hardhat *)"
+      "Bash(npx hardhat *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(npm list *)",
+      "Bash(npx vercel *)",
+      "Bash(npx netlify *)",
+      "Bash(git commit -m 'Shorten page title to VaultCredit *)"
     ]
   }
 }
